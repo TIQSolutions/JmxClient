@@ -3,10 +3,10 @@
 	<JmxMBeanData>
 		<className>org.apache.hadoop.hbase.regionserver.metrics.RegionServerStatistics</className>
 		<associatedObjectName>hadoop:service=RegionServer,name=RegionServerStatistics</associatedObjectName>
-		<applyableMethods>
-			<method>getRequests</method>
-			<method>getReadRequestsCount</method>
-			<method>getWriteRequestsCount</method>
-		</applyableMethods>
+		<attributes>
+			<attribut>requests</attribut>
+			<attribut>readRequestsCount</attribut><!-- Aggregated read request count -->
+			<attribut>writeRequestsCount</attribut><!-- Aggregated write request count -->
+		</attributes>
 	</JmxMBeanData>
 </jmxData> 

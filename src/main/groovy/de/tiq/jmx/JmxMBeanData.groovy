@@ -6,12 +6,12 @@ class JmxMBeanData {
 	
 	String className;
 	ObjectName associatedObjectName;
-	List<String> applyableMethodNames;
+	List<String> attributes;
 	
 	JmxMBeanData(String className, ObjectName associatedObjectName, List<String> applyableMethodNames) {
 		this.className = className
 		this.associatedObjectName = associatedObjectName
-		this.applyableMethodNames = applyableMethodNames
+		this.attributes = applyableMethodNames
 	}
 	
 	@Override
@@ -20,14 +20,14 @@ class JmxMBeanData {
 		if(obj instanceof JmxMBeanData){
 			isEqual = obj.className == className && 
 					  obj.associatedObjectName == associatedObjectName && 
-					  obj.applyableMethodNames == applyableMethodNames
+					  obj.attributes == attributes
 		}
 		return isEqual
 	}
 
 	@Override
 	public String toString() {
-		return "JmxMBeanData [className=" + className + ", associatedObjectName=" + associatedObjectName + ", applyableMethodNames=" + applyableMethodNames.join(" ") + "]";
+		return "JmxMBeanData [className=" + className + ", associatedObjectName=" + associatedObjectName + ", applyableMethodNames=" + attributes.join(" ") + "]";
 	}
 	
 }

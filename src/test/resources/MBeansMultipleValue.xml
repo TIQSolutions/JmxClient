@@ -3,24 +3,15 @@
 	<JmxMBeanData>
 		<className>java.lang.management.ThreadMXBean</className>
 		<associatedObjectName>java.lang:type=Threading</associatedObjectName>
-		<applyableMethods>
-			<method>getThreadCount</method>
-		</applyableMethods>
+		<attributes>
+			<attribut>ThreadCount</attribut>
+		</attributes>
 	</JmxMBeanData>
 	<JmxMBeanData>
 		<className>java.lang.management.ClassLoadingMXBean</className>
 		<associatedObjectName>java.lang:type=ClassLoading</associatedObjectName>
-		<applyableMethods>
-			<method>getTotalLoadedClassCount</method>
-		</applyableMethods>
+		<attributes>
+			<attribut>TotalLoadedClassCount</attribut>
+		</attributes>
 	</JmxMBeanData>
-<!-- 	<JmxMBeanData>
-		<className>org.apache.hadoop.hbase.regionserver.metrics.RegionServerStatistics</className>
-		<associatedObjectName>hadoop:service=RegionServer,name=RegionServerStatistics</associatedObjectName>
-		<applyableMethods>
-			<method>requests</method>
-			<method>readRequestsCount</method>
-			<method>writeRequestsCount</method>
-		</applyableMethods>
-	</JmxMBeanData> -->
 </jmxData>

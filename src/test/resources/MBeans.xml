@@ -3,8 +3,8 @@
 	<JmxMBeanData>
 		<className>java.lang.management.ThreadMXBean</className>
 		<associatedObjectName>java.lang:type=Threading</associatedObjectName>
-		<applyableMethods>
-			<method>getThreadCount</method>
-		</applyableMethods>
+		<attributes>
+			<attribut>ThreadCount</attribut>
+		</attributes>
 	</JmxMBeanData>
 </jmxData>

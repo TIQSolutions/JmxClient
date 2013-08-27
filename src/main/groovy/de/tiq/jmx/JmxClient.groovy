@@ -34,7 +34,7 @@ class Main{
 		List<JmxMBeanData> jmxData = converter.convertTo()
 		def client = new JmxClient(args[1], args[2], jmxData, intervall);	
 		client.start()
-		new CsvPrinter(outputFileName, jmxData.collect{it.getApplyableMethodNames().join(",")}, client.getResultQueue())
+		new CsvPrinter(outputFileName, jmxData.collect{it.getAttributes().join(",")}, client.getResultQueue())
 	}
 }
 
@@ -56,14 +56,12 @@ class JmxClient extends Thread {
 	@Override
 	void run(){
 		mbeanConnection = JMXConnectorFactory.connect(jmxUrl).getMBeanServerConnection();
-		def mapping = createProxyToMethodsMapping(mbeanConnection)
-		println(mapping)
 		while(true){
 			if(System.currentTimeMillis() % intervall == 0){
 				def currentResult = []
-				mapping.each { key, value ->
-					value.each {
-						currentResult << key."$it"()
+				retrievableMetrics.each { currentJmxData -> 
+					currentJmxData.attributes.each { attribute ->
+						currentResult << mbeanConnection.getAttribute(currentJmxData.associatedObjectName, attribute)
 					}
 				}
 				resultQueue.add(currentResult)
@@ -72,19 +70,6 @@ class JmxClient extends Thread {
 		}
 	}
 
-	@PackageScope
-	Map<Object, List<String>> createProxyToMethodsMapping(MBeanServerConnection mbeanServerConnection){
-		def mapping = [:]
-		for(JmxMBeanData metric in retrievableMetrics){
-			def currentProxy = MBeanServerInvocationHandler.newProxyInstance(mbeanServerConnection, 
-																			 metric.associatedObjectName, 
-																			 Class.forName(metric.className), 
-																			 true)
-			mapping.put(currentProxy, metric.applyableMethodNames)
-		}
-		return mapping
-	}
-	
 	void close(){
 		jmxConnector.close()
 	}
