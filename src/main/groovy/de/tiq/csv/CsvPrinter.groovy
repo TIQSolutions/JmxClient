@@ -8,12 +8,14 @@ class CsvPrinter extends Thread {
 	
 	private static SimpleDateFormat FORMATER = new SimpleDateFormat("dd.MM.YYYY HH:mm:ss S")
 	private static String SEPARATOR = ','
+	private static String addtionalComments
 	
 	private File outputFile
 	private List<String> headerInfo
 	private BlockingQueue<List<String>> writableResults
 
-	CsvPrinter(String pathToOutputFile, List<String> headerInfo, BlockingQueue<List<String>> writableResults){
+	CsvPrinter(String pathToOutputFile, List<String> headerInfo, BlockingQueue<List<String>> writableResults, String additionalComments=""){
+		this.addtionalComments = additionalComments
 		this.writableResults = writableResults
 		this.headerInfo = headerInfo
 		initOutputFile(pathToOutputFile)
@@ -31,6 +33,10 @@ class CsvPrinter extends Thread {
 	def printHeader(){
 		outputFile.append("# generated from JMXClient application at " + FORMATER.format(new Date()))
 		outputFile.append("\n")
+		if(!addtionalComments.isEmpty()){
+			outputFile.append("# " +addtionalComments)
+			outputFile.append("\n")
+		}
 		outputFile.append(headerInfo.join(SEPARATOR));
 		outputFile.append("\n")
 	}

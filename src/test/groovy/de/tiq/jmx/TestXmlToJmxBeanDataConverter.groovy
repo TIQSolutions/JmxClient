@@ -14,8 +14,4 @@ class TestXmlToJmxBeanDataConverter extends GroovyTestCase {
 		assert new JmxMBeanData("java.lang.management.ThreadMXBean", new ObjectName("java.lang:type=Threading"), ["ThreadCount"]) == testable.convertTo()[0]
 	}
 	
-//	public void testMultipleObjectCreation() throws Exception {
-//		XmlToJmxBeanDataConverter testable = new XmlToJmxBeanDataConverter(FILE_PATH_PREFIX + "/MBeansMultipleValue.xml")
-//		assert new JmxMBeanData("ThreadMXBean", new ObjectName("java.lang:type=Threading"), ["getThreadCount"]) == testable.convertTo()[0]
-//	}
 }
