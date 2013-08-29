@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmx-clients>
+	<client>
+		<host>localhost</host>
+		<port>1234</port>
+	</client>
+</jmx-clients>
