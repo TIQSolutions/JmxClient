@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jmxData>
 	<JmxMBeanData>
-		<className>org.apache.hadoop.hbase.regionserver.metrics.RegionServerStatistics</className>
 		<associatedObjectName>hadoop:service=RegionServer,name=RegionServerStatistics</associatedObjectName>
 		<attributes>
 			<attribut>requests</attribut>

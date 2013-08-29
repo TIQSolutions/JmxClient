@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jmxData>
 	<JmxMBeanData>
-		<className>java.lang.management.ThreadMXBean</className>
 		<associatedObjectName>java.lang:type=Threading</associatedObjectName>
 		<attributes>
 			<attribut>ThreadCount</attribut>
 		</attributes>
 	</JmxMBeanData>
 	<JmxMBeanData>
-		<className>java.lang.management.ClassLoadingMXBean</className>
 		<associatedObjectName>java.lang:type=ClassLoading</associatedObjectName>
 		<attributes>
 			<attribut>TotalLoadedClassCount</attribut>
