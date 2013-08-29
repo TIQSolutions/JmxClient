@@ -7,39 +7,61 @@
 
 package de.tiq.jmx
 
-import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 
-import de.tiq.csv.CsvPrinter
-import groovy.transform.PackageScope;
-
 import javax.management.MBeanServerConnection
-import javax.management.MBeanServerInvocationHandler
-import javax.management.ObjectName
-import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory
 import javax.management.remote.JMXServiceURL
 
+import de.tiq.csv.CsvPrinter
 
-class Main{
+
+class MultipleJmxClients{
 	
-	private static String HEADER = '';
-	private static String USAGE = 'Usage: java (...) de.tiq.jmx.Main';
-	private static Long DEFAULT_INTERVALL = 1000L
-	private static String DEFAULT_OUTPUT_FILE = "jmx_statistics.csv"
+	private static String DEFAULT_CLIENTS_FILE = "jmx-clients.xml"
+	
+	static class JmxHostPortData {
+		String host
+		String port
+	} 
 	
 	static main(args){
+		def clients = []
+		def xmlParser = new XmlParser().parseText(new File(DEFAULT_CLIENTS_FILE).getText('UTF-8'))
+		xmlParser.each { node ->
+			clients << new JmxHostPortData(host:node.get("host").text(), port:node.get("port").text())
+		}
+		for(client in clients){
+			def outputfileName = client.host + "-" + client.port + "-jmx-statistics.csv"
+			List<String> currentArgs = [args, "-h", client.host, "-p", client.port, "-of", outputfileName]
+			JmxClient.main(currentArgs.flatten() as String[])  
+		}
+	}
+	
+
+}
+
+class JmxClient extends Thread {
+
+	private static String HEADER = '';
+	private static String USAGE = 'Usage: java (...) de.tiq.jmx.JmxClient';
+	private static Long DEFAULT_INTERVALL = 1000L
+	private static String DEFAULT_OUTPUT_FILE = "jmx_statistics.csv"
+
+	static main(args){
+		// TODO add shutdown hook for close to rmi connection (JmxClient instance)
 		CliBuilder commandLineParser = createCliParser()
 		def options = commandLineParser.parse(args)
 		if(options.host && options.port && options.jmx_file){
 			def converter = new XmlToJmxBeanDataConverter(options.jmx_file); // == null ? "mbeans.xml" : args[0]
 			List<JmxMBeanData> jmxData = converter.convertTo()
-			def client = new JmxClient(options.host, options.port, jmxData, options.i ?: DEFAULT_INTERVALL);	
+			def client = new JmxClient(options.host, options.port, jmxData, options.i ?: DEFAULT_INTERVALL);
 			client.start()
 			new CsvPrinter(options.of ?: DEFAULT_OUTPUT_FILE, jmxData.collect{it.getAttributes().join(",")}, client.getResultQueue(), options.c ?: "")
 		} else {
 			commandLineParser.usage()
-		}	
+		}
 	}
 
 	private static CliBuilder createCliParser() {
@@ -53,10 +75,7 @@ class Main{
 		commandLineParser.c(args:1, argName:'additionalComment', longOpt:'add_comment', 'A additional comment line in the output csv file header')
 		return commandLineParser
 	}
-}
-
-class JmxClient extends Thread {
-
+		
 	private Long intervall
 	private List<JmxMBeanData> retrievableMetrics
 	private MBeanServerConnection mbeanConnection
@@ -90,5 +109,6 @@ class JmxClient extends Thread {
 	void close(){
 		jmxConnector.close()
 	}
+
 }
 
