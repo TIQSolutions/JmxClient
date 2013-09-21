@@ -1,10 +1,12 @@
-/*
- * JMX Bean monitor script. 
- * args[0] host of JMX server programm
- * args[1] port of JMX server programm
+/**
+ * JMX Bean monitor class. 
+ * Use de.tiq.jmx.MultipleJmxClients to easily connect to multiple jmx clients. 
+ * Therefore you can use a file called jmx-clients.xml in your local working directory. 
+ * 
+ * Use de.tiq.jmx.JmxClient to connect to one specific jmx client.
+ * You can use the -help option to get more help.
  *
  */
-
 package de.tiq.jmx
 
 import java.util.concurrent.BlockingQueue
@@ -45,7 +47,7 @@ class MultipleJmxClients{
 class JmxClient extends Thread {
 
 	private static String HEADER = '';
-	private static String USAGE = 'Usage: java (...) de.tiq.jmx.JmxClient';
+	private static String USAGE = 'Usage: java (...) de.tiq.jmx.JmxClient -h <host> -p <port> -jf <path-to-jmx-file>';
 	private static Long DEFAULT_INTERVALL = 1000L
 	private static String DEFAULT_OUTPUT_FILE = "jmx_statistics.csv"
 
@@ -53,7 +55,10 @@ class JmxClient extends Thread {
 		// TODO add shutdown hook for close to rmi connection (JmxClient instance)
 		CliBuilder commandLineParser = createCliParser()
 		def options = commandLineParser.parse(args)
-		if(options.host && options.port && options.jmx_file){
+		options.arguments()
+		if(args.size() == 0 || options.help){
+			commandLineParser.usage()
+		} else if(options.host && options.port && options.jmx_file){
 			def converter = new XmlToJmxBeanDataConverter(options.jmx_file); // == null ? "mbeans.xml" : args[0]
 			List<JmxMBeanData> jmxData = converter.convertTo()
 			def client = new JmxClient(options.host, options.port, jmxData, options.i ?: DEFAULT_INTERVALL);
@@ -69,7 +74,7 @@ class JmxClient extends Thread {
 		commandLineParser.help('prints this help message')
 		commandLineParser.h(args:1, argName:'host', longOpt:'host', 'the jmx host to address')
 		commandLineParser.p(args:1, argName:'port', longOpt:'port', 'the jmx port to address')
-		commandLineParser.i(args:1, argName:'intervall', longOpt:'intervall', 'the intervall of data emission')
+		commandLineParser.i(args:1, argName:'intervall', longOpt:'intervall', 'the intervall of data emission, default is one second')
 		commandLineParser.jf(args:1, argName:'jmxFile', longOpt:'jmx_file', 'the path to the jmx xml file, in which the processable attributes are specified')
 		commandLineParser.of(args:1, argName:'outputFile', longOpt:'output_file', 'the path to the file, in which should contain the recorded data in csv format')
 		commandLineParser.c(args:1, argName:'additionalComment', longOpt:'add_comment', 'A additional comment line in the output csv file header')
