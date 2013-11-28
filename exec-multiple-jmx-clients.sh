@@ -1,3 +1,3 @@
 #!/bin/bash
 
-java -cp ".;"$(cd ../.. && mvn dependency:build-classpath | grep -E "(C:\\.*\n?)") de.tiq.jmx.MultipleJmxClients -jf ../test-classes/MBeansMultipleValue.xml
+mvn exec:java -Dexec.mainClass=de.tiq.jmx.MultipleJmxClients -Darguments='-jf,../test-classes/MBeansMultipleValue.xml' "$@"

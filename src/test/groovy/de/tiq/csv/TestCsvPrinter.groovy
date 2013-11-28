@@ -28,11 +28,16 @@ class TestCsvPrinter extends GroovyTestCase {
 
 	private static String TEST_FILE_DEST = "./target/test-classes/csv-data-testfile"
 	
+	private File resultFile
+	
+	public void setUp() throws Exception {
+		resultFile = new File(TEST_FILE_DEST)
+	};
+	
 	public void testSimpleFileCreation() throws Exception {
 		def resultListHandle = new LinkedBlockingQueue()
 		def headerFixture = ["headerA","headerB"]
 		def testable = new CsvPrinter(TEST_FILE_DEST, headerFixture, resultListHandle)
-		def resultFile = new File(TEST_FILE_DEST)
 		assertEquals(headerFixture.join(","), resultFile.getText().split(/\n/)[1])
 		resultListHandle.put(["a","b"])
 		resultListHandle.put(["c","d"])
@@ -42,5 +47,10 @@ class TestCsvPrinter extends GroovyTestCase {
 		assertEquals(headerFixture.join(","), finalResult[1])
 		assertEquals("a,b", finalResult[2])
 		assertEquals("c,d", finalResult[3])
+	}
+	
+	@Override
+	public void tearDown() throws Exception {
+		resultFile.delete()
 	}
 }

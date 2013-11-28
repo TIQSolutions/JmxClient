@@ -39,7 +39,7 @@ class XmlToJmxBeanDataConverter {
 		jmxMBeanDataList.each { node ->
 			def associatedMethodName = node.get("associatedObjectName").text()
 			//the get method of a node returns a nodelist, so we need to get the first value of it with [0]
-			def applyableMethods = node.get("attributes")[0].children().collect {it.text()}	
+			def applyableMethods = node['attributes'][0].children().collect {it.text()}	
 			result << new JmxMBeanData(associatedObjectName:new ObjectName(associatedMethodName), attributes:applyableMethods) 
 		}
 		return result
