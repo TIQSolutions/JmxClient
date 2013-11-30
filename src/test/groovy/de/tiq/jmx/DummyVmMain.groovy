@@ -22,26 +22,10 @@
  */
 package de.tiq.jmx
 
-import javax.management.ObjectName
+class DummyVmMain {
 
-class JmxMBeanData {
-	
-	ObjectName associatedObjectName;
-	List attributes;
-	
-	@Override
-	public boolean equals(Object obj) {
-		boolean isEqual = false
-		if(obj instanceof JmxMBeanData){
-			isEqual = obj.associatedObjectName == associatedObjectName && 
-					  obj.attributes == attributes
-		}
-		return isEqual
+	static main(args){
+		println "started dummy"
+		Thread.sleep(5000)
 	}
-
-	@Override
-	public String toString() {
-		return "JmxMBeanData [associatedObjectName=" + associatedObjectName + ", attributes=" + attributes + "]";
-	}
-	
 }

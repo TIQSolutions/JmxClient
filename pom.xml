@@ -3,10 +3,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.tiq</groupId>
 	<artifactId>JmxClient</artifactId>
-	<version>0.0.2</version>
+	<version>0.0.3</version>
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+
 	<build>
 		<plugins>
 			<plugin>
@@ -15,6 +17,7 @@
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
+					<compilerArgument>-Xlint:unchecked</compilerArgument>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -23,18 +26,30 @@
 				<version>1.5</version>
 				<executions>
 					<execution>
-						<id>test-compile</id>
+						<id>groovy-stubs</id>
+						<phase>generate-sources</phase>
 						<goals>
 							<goal>generateStubs</goal>
+						</goals>
+					</execution> 
+					<execution>
+						<id>groovy-compile</id>
+						<phase>compile</phase>
+						<goals>
 							<goal>compile</goal>
-							<goal>generateTestStubs</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>groovy-test-compile</id>
+						<phase>test-compile</phase>
+						<goals>
 							<goal>testCompile</goal>
 						</goals>
-						<configuration>
-							<providerSelection>2.0</providerSelection>
-						</configuration>
 					</execution>
 				</executions>
+				<configuration>
+					<providerSelection>2.0</providerSelection>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -57,6 +72,7 @@
 			</plugin>
 		</plugins>
 	</build>
+
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>
@@ -76,6 +92,7 @@
 			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
+
 	<repositories>
 		<repository>
 			<id>codehaus</id>
@@ -90,4 +107,18 @@
 			</snapshots>
 		</repository>
 	</repositories>
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<version>2.6</version>
+				<configuration>
+					<lineLength>150</lineLength>
+				</configuration>
+			</plugin>
+		</plugins>
+	</reporting>
+
 </project>

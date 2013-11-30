@@ -31,25 +31,27 @@
  */
 package de.tiq.jmx
 
+import java.lang.management.ManagementFactory;
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 
 import javax.management.MBeanServerConnection
 import javax.management.remote.JMXConnectorFactory
 import javax.management.remote.JMXServiceURL
+import javax.net.ssl.HostnameVerifier;
 
 import de.tiq.csv.CsvPrinter
 
 
 class MultipleJmxClients{
-	
+
 	private static String DEFAULT_CLIENTS_FILE = "jmx-clients.xml"
-	
+
 	static class JmxHostPortData {
 		String host
 		String port
-	} 
-	
+	}
+
 	static main(args){
 		def clients = []
 		def xmlParser = new XmlParser().parseText(new File(DEFAULT_CLIENTS_FILE).getText('UTF-8'))
@@ -58,12 +60,30 @@ class MultipleJmxClients{
 		}
 		for(client in clients){
 			def outputfileName = client.host + "-" + client.port + "-jmx-statistics.csv"
-			List<String> currentArgs = [args, "-h", client.host, "-p", client.port, "-of", outputfileName]
-			JmxClient.main(currentArgs.flatten() as String[])  
+			List<String> currentArgs = [
+				args,
+				"-h",
+				client.host,
+				"-p",
+				client.port,
+				"-of",
+				outputfileName
+			]
+			JmxClient.main(currentArgs.flatten() as String[])
 		}
 	}
-	
+}
 
+class JmxRemoteConnector {
+	
+	String host
+	String port
+	
+	MBeanServerConnection getUnauthorizedMBeanServerConnection(){
+		def jmxUrl = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://${host}:${port}/jmxrmi")
+		return JMXConnectorFactory.connect(jmxUrl).getMBeanServerConnection()
+	}
+	
 }
 
 class JmxClient extends Thread {
@@ -102,39 +122,45 @@ class JmxClient extends Thread {
 		commandLineParser.c(args:1, argName:'additionalComment', longOpt:'add_comment', 'A additional comment line in the output csv file header')
 		return commandLineParser
 	}
-		
+
 	private Long intervall
 	private List<JmxMBeanData> retrievableMetrics
 	private MBeanServerConnection mbeanConnection
-	private JMXServiceURL jmxUrl
-	
+	private volatile Boolean isInterupted = Boolean.FALSE
+
 	BlockingQueue<List> resultQueue = new LinkedBlockingQueue<List>()
 
-	JmxClient(String host, String port, List<JmxMBeanData> retrievableMetrics, Long intervall) throws IOException {
+	JmxClient(List<JmxMBeanData> retrievableMetrics, Long intervall, String host, String port) throws IOException {
+		this(retrievableMetrics, intervall, new JmxRemoteConnector(host:host, port:port).getUnauthorizedMBeanServerConnection())
+	}
+	
+	JmxClient(List<JmxMBeanData> retrievableMetrics, Long intervall) throws IOException {
+		this(retrievableMetrics, intervall, ManagementFactory.platformMBeanServer)
+	}
+
+	JmxClient(List<JmxMBeanData> retrievableMetrics, Long intervall, MBeanServerConnection mbeanConnection) throws IOException {
 		this.intervall = intervall
 		this.retrievableMetrics = retrievableMetrics
-		jmxUrl = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/jmxrmi")
+		this.mbeanConnection = mbeanConnection
 	}
 
 	@Override
 	void run(){
-		mbeanConnection = JMXConnectorFactory.connect(jmxUrl).getMBeanServerConnection();
-		while(true){
-			if(System.currentTimeMillis() % intervall == 0){
-				def currentResult = []
-				retrievableMetrics.each { currentJmxData -> 
-					currentJmxData.attributes.each { attribute ->
-						currentResult << mbeanConnection.getAttribute(currentJmxData.associatedObjectName, attribute)
-					}
-				}
-				resultQueue.add(currentResult)
-				System.out.println(currentResult)
+		while(!isInterupted){
+			sleep(intervall)
+			def currentResult = []
+			retrievableMetrics.each { currentJmxData ->
+				def attributeList = mbeanConnection.getAttributes(currentJmxData.associatedObjectName, currentJmxData.attributes as String[])
+				currentResult.addAll(attributeList)
 			}
+			resultQueue.add(currentResult)
+			System.out.println(currentResult)
 		}
 	}
 
-	void close(){
-		jmxConnector.close()
+	@Override
+	public void interrupt() {
+		isInterupted = Boolean.TRUE
 	}
 
 }

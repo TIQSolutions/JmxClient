@@ -34,7 +34,7 @@ class CsvPrinter extends Thread {
 	
 	private File outputFile
 	private List<String> headerInfo
-	private BlockingQueue<List<String>> writableResults
+	private BlockingQueue<List> writableResults
 
 	CsvPrinter(String pathToOutputFile, List<String> headerInfo, BlockingQueue<List<String>> writableResults, String additionalComments=""){
 		this.addtionalComments = additionalComments
@@ -65,8 +65,9 @@ class CsvPrinter extends Thread {
 	
 	@Override
 	public void run() {
-		while(true){
-			def currentResult = writableResults.take()
+		while(true){	//TODO interrupt!
+			def currentResult = writableResults.take().collect{it.getValue()} // TODO maybe pass this closure as a 
+																			   //parameter to support different classes than attribute  
 			outputFile.append(currentResult.join(SEPARATOR)) 
 			outputFile.append("\n")
 		}
