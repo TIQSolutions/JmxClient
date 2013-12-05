@@ -36,6 +36,7 @@ import java.util.concurrent.BlockingQueue
 import java.util.concurrent.LinkedBlockingQueue
 
 import javax.management.MBeanServerConnection
+import javax.management.openmbean.CompositeData;
 import javax.management.remote.JMXConnectorFactory
 import javax.management.remote.JMXServiceURL
 import javax.net.ssl.HostnameVerifier;
@@ -150,12 +151,31 @@ class JmxClient extends Thread {
 			sleep(intervall)
 			def currentResult = []
 			retrievableMetrics.each { currentJmxData ->
-				def attributeList = mbeanConnection.getAttributes(currentJmxData.associatedObjectName, currentJmxData.attributes as String[])
-				currentResult.addAll(attributeList)
+				currentResult << evaluateJmxMBeanData(currentJmxData)
 			}
-			resultQueue.add(currentResult)
-			System.out.println(currentResult)
+			resultQueue.add(currentResult.flatten())
 		}
+	}
+
+	private List evaluateJmxMBeanData(JmxMBeanData currentJmxData) {
+		def currentResult = []
+		currentJmxData.attributes.each { attribute ->
+			def currentDataSet = mbeanConnection.getAttribute(currentJmxData.associatedObjectName, attribute.name)
+			currentResult << getDatasets(attribute, currentDataSet)
+		}
+		return currentResult
+	}
+
+	def getDatasets(Attribute attribute, currentDataSet) {
+		def returnable = []
+		if(CompositeData.class.isInstance(currentDataSet)){
+			attribute.compositeKeys.each { key ->
+				returnable << currentDataSet.get(key)
+			}
+		} else {
+			returnable << currentDataSet
+		}
+		return returnable
 	}
 
 	@Override

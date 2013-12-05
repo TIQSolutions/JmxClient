@@ -25,7 +25,6 @@ package de.tiq.csv
 import java.util.concurrent.LinkedBlockingQueue
 import javax.management.Attribute;
 
-
 class TestCsvPrinter extends GroovyTestCase {
 
 	private static String TEST_FILE_DEST = "./target/test-classes/csv-data-testfile"

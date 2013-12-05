@@ -30,11 +30,13 @@ class CsvPrinter extends Thread {
 	
 	private static SimpleDateFormat FORMATER = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss S")
 	private static String SEPARATOR = ','
-	private static String addtionalComments
 	
+	private String addtionalComments
 	private File outputFile
 	private List<String> headerInfo
 	private BlockingQueue<List> writableResults
+	
+	private Boolean isInterrupted = Boolean.FALSE
 
 	CsvPrinter(String pathToOutputFile, List<String> headerInfo, BlockingQueue<List<String>> writableResults, String additionalComments=""){
 		this.addtionalComments = additionalComments
@@ -65,11 +67,17 @@ class CsvPrinter extends Thread {
 	
 	@Override
 	public void run() {
-		while(true){	//TODO interrupt!
+		while(!isInterrupted){
 			def currentResult = writableResults.take().collect{it.getValue()} // TODO maybe pass this closure as a 
 																			   //parameter to support different classes than attribute  
 			outputFile.append(currentResult.join(SEPARATOR)) 
 			outputFile.append("\n")
 		}
+	}
+	
+	@Override
+	public void interrupt() {
+		isInterrupted = Boolean.TRUE
+		super.interrupt();
 	}
 }

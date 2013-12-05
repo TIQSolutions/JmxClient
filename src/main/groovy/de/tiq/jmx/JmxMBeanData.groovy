@@ -24,17 +24,48 @@ package de.tiq.jmx
 
 import javax.management.ObjectName
 
+
+class Attribute {
+	
+	String name
+	List<String> compositeKeys = []
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((compositeKeys == null) ? 0 : compositeKeys.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		boolean isEqual = false
+		if(obj instanceof Attribute){
+			isEqual = obj?.name == name && obj?.compositeKeys == compositeKeys 
+		}
+		return isEqual
+	}
+
+	@Override
+	public String toString() {
+		return "Attribute [name=" + name + ", compositeKeys=" + compositeKeys + "]";
+	}	
+	
+}
+
 class JmxMBeanData {
 	
 	ObjectName associatedObjectName;
-	List attributes;
+	List<Attribute> attributes;
 	
 	@Override
 	public boolean equals(Object obj) {
 		boolean isEqual = false
 		if(obj instanceof JmxMBeanData){
-			isEqual = obj.associatedObjectName == associatedObjectName && 
-					  obj.attributes == attributes
+			isEqual = obj?.associatedObjectName == associatedObjectName && 
+					  obj?.attributes == attributes
 		}
 		return isEqual
 	}

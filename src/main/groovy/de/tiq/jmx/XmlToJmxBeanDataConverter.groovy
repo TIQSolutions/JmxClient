@@ -25,9 +25,9 @@ package de.tiq.jmx
 import javax.management.ObjectName
 
 class XmlToJmxBeanDataConverter {
-	
+
 	String pathToFile;
-	
+
 	XmlToJmxBeanDataConverter(String pathToFile) {
 		this.pathToFile = pathToFile
 	}
@@ -37,11 +37,21 @@ class XmlToJmxBeanDataConverter {
 		def xmlContent = new File(pathToFile).getText('UTF-8')
 		def jmxMBeanDataList = new XmlParser().parseText(xmlContent)
 		jmxMBeanDataList.each { node ->
-			def associatedMethodName = node.get("associatedObjectName").text()
+			def associatedMethodName = node.associatedObjectName.text()
+			def attributes = getAttributesOfMBean(node)
 			//the get method of a node returns a nodelist, so we need to get the first value of it with [0]
-			def applyableMethods = node['attributes'][0].children().collect {it.text()}	
-			result << new JmxMBeanData(associatedObjectName:new ObjectName(associatedMethodName), attributes:applyableMethods) 
+			result << new JmxMBeanData(associatedObjectName:new ObjectName(associatedMethodName), attributes:attributes)
 		}
 		return result
+	}
+
+	private List getAttributesOfMBean(node) {
+		def attributes = []
+		def applyableMethods = node.attributes[0].children().each { attributeNode ->
+			def name = attributeNode.name.text()
+			def keys = attributeNode.compositeKeys.key.collect{  it.text() }
+			attributes << new Attribute(name: name, compositeKeys: keys)
+		}
+		return attributes
 	}
 }

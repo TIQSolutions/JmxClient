@@ -22,18 +22,55 @@
  */
 package de.tiq.jmx
 
-import groovy.util.GroovyTestCase
-import de.tiq.jmx.JmxMBeanData
-import de.tiq.jmx.XmlToJmxBeanDataConverter;
 import javax.management.ObjectName
 
-class TestXmlToJmxBeanDataConverter extends GroovyTestCase {
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.junit.runners.Parameterized
+import org.junit.runners.Parameterized.Parameter
+import org.junit.runners.Parameterized.Parameters
 
-	private static String FILE_PATH_PREFIX = "src/test/resources" 
+@RunWith(Parameterized)
+class TestXmlToJmxBeanDataConverter {
+
+	private static String FILE_PATH_PREFIX = "src/test/resources/"
+	
+	@Parameters(name="parsing xml file {0} to JmxMBeanData")
+	public static List<Object[]> data() {
 		
-	public void testSingleObjectCreation() throws Exception {
-		XmlToJmxBeanDataConverter testable = new XmlToJmxBeanDataConverter(FILE_PATH_PREFIX + "/MBeans.xml")
-		assert new JmxMBeanData(associatedObjectName:new ObjectName("java.lang:type=Threading"), attributes:["ThreadCount"]) == testable.convertTo()[0]
+		return [ ["MBeans.xml", createSimpleFixture()] as Object[],
+				  ["MBeans_Composite.xml", createCompositeAttributeFixture()] as Object[]
+				]
 	}
 	
+	def static createSimpleFixture(){
+		def objectName = new ObjectName("java.lang:type=Threading")
+		def attributeList = [new Attribute(name: "ThreadCount", compositeKeys: [])]
+		return new JmxMBeanData(associatedObjectName:objectName, attributes:attributeList)
+	}
+	
+	def static createCompositeAttributeFixture(){
+		def objectName = new ObjectName("java.lang:type=Memory")
+		def attributeList = [new Attribute(name: "HeapMemoryUsage", compositeKeys: ['init', 'max', 'used'])]
+		return new JmxMBeanData(associatedObjectName:objectName, attributes:attributeList)
+	}
+	
+	@Parameter(0)
+	public String filename
+	
+	@Parameter(1)
+	public JmxMBeanData expected
+		
+	public XmlToJmxBeanDataConverter testable 
+	
+	@Before
+	public void before() {
+		testable = new XmlToJmxBeanDataConverter(FILE_PATH_PREFIX + filename)
+	}
+	
+	@Test
+	public void testParsing() throws Exception {
+		assert expected == testable.convertTo()[0]
+	}
 }

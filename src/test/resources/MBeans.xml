@@ -3,7 +3,9 @@
 	<JmxMBeanData>
 		<associatedObjectName>java.lang:type=Threading</associatedObjectName>
 		<attributes>
-			<attribut>ThreadCount</attribut>
+			<attribut>
+				<name>ThreadCount</name>
+			</attribut>
 		</attributes>
 	</JmxMBeanData>
 </jmxData>

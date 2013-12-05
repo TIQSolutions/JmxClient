@@ -23,7 +23,9 @@
 package de.tiq.jmx
 
 import java.lang.management.ManagementFactory
+
 import javax.management.ObjectName
+
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -33,7 +35,17 @@ import org.junit.runners.Parameterized.Parameters
 @RunWith(Parameterized)
 class TestJmxClient {
 	
-	private static final JmxMBeanData QUERY = new JmxMBeanData(associatedObjectName: new ObjectName("java.lang:type=Threading"),  attributes: ['ThreadCount', 'DaemonThreadCount'] )
+	private static final JmxMBeanData QUERY = new JmxMBeanData(
+												associatedObjectName: new ObjectName("java.lang:type=Threading"),  
+												attributes: [new Attribute(name : 'ThreadCount', compositeKeys : []), 
+															 new Attribute(name : 'DaemonThreadCount', compositeKeys : [])
+															 ])
+	
+	private static final JmxMBeanData QUERY_NEU = new JmxMBeanData(
+													associatedObjectName: new ObjectName("java.lang:type=Memory"),  
+													attributes: [new Attribute(name : 'HeapMemoryUsage', compositeKeys : ['init', 'max', 'used'])
+																])
+	
 	private static final Long INTERVALL = 90L
 	
 	private static final String TESTPORT = "8909"
@@ -51,9 +63,9 @@ class TestJmxClient {
            .execute()
 			Thread.sleep(1000L)
 		}
-		return [ [ [], {} ] as Object[],
-				  [[ManagementFactory.platformMBeanServer], {}] as Object[],
-				  [ ["localhost", TESTPORT], dummyJvmCreator  ] as Object[] 
+		return [ [ [], {}, QUERY_NEU ] as Object[],
+				  [[ManagementFactory.platformMBeanServer], {}, QUERY] as Object[],
+				  [ ["localhost", TESTPORT], dummyJvmCreator, QUERY ] as Object[] 
 				] 
 	}
 	
@@ -63,15 +75,18 @@ class TestJmxClient {
 	@Parameter(1)
 	public Closure callBeforeTest
 	
+	@Parameter(2)
+	public JmxMBeanData query
+	
 	
 	@Test
 	public void testMBeanConnection(){
 		callBeforeTest.call()
-		def testable = new JmxClient([QUERY], INTERVALL, *constructorParams)
+		def testable = new JmxClient([query], INTERVALL, *constructorParams)
 		testable.start()
 		Thread.sleep(1000)
 		testable.interrupt()
-		assert (9..11).containsWithinBounds(testable.resultQueue.size()) 	
+		assert (8..10).containsWithinBounds(testable.resultQueue.size()) 	
 	}
 	
 }
