@@ -46,7 +46,7 @@ import de.tiq.csv.CsvPrinter
 
 class MultipleJmxClients{
 
-	private static String DEFAULT_CLIENTS_FILE = "jmx-clients.xml"
+	private static final String DEFAULT_CLIENTS_FILE = "jmx-clients.xml"
 
 	static class JmxHostPortData {
 		String host
@@ -76,19 +76,19 @@ class MultipleJmxClients{
 }
 
 class JmxRemoteConnector {
-	
+
 	String host
 	String port
-	
+
 	MBeanServerConnection getUnauthorizedMBeanServerConnection(){
 		def jmxUrl = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://${host}:${port}/jmxrmi")
 		return JMXConnectorFactory.connect(jmxUrl).getMBeanServerConnection()
 	}
-	
 }
 
 class JmxClient extends Thread {
 
+	private static final String SEPARATOR = ','
 	private static String HEADER = '';
 	private static String USAGE = 'Usage: java (...) de.tiq.jmx.JmxClient -h <host> -p <port> -jf <path-to-jmx-file>';
 	private static Long DEFAULT_INTERVALL = 1000L
@@ -104,9 +104,20 @@ class JmxClient extends Thread {
 		} else if(options.host && options.port && options.jmx_file){
 			def converter = new XmlToJmxBeanDataConverter(options.jmx_file); // == null ? "mbeans.xml" : args[0]
 			List<JmxMBeanData> jmxData = converter.convertTo()
-			def client = new JmxClient(options.host, options.port, jmxData, options.i ?: DEFAULT_INTERVALL);
+			def client = new JmxClient(jmxData, options.i ?: DEFAULT_INTERVALL, options.host, options.port);
 			client.start()
-			new CsvPrinter(options.of ?: DEFAULT_OUTPUT_FILE, jmxData.collect{it.getAttributes().join(",")}, client.getResultQueue(), options.c ?: "")
+			def csvColumnHeader = jmxData.collect{ curJmxData ->
+				def curColumns = curJmxData.attributes.collect {
+					if(it.compositeKeys) 
+						return it.compositeKeys.join(SEPARATOR)
+					else 
+						return it.name
+				}
+				curColumns.join(SEPARATOR)
+			}
+			new CsvPrinter(options.of ?: DEFAULT_OUTPUT_FILE, csvColumnHeader, client.getResultQueue(), options.c ?: "")
+			println 'Exit the application with Sigterm...'
+			client.join();
 		} else {
 			commandLineParser.usage()
 		}
@@ -134,7 +145,7 @@ class JmxClient extends Thread {
 	JmxClient(List<JmxMBeanData> retrievableMetrics, Long intervall, String host, String port) throws IOException {
 		this(retrievableMetrics, intervall, new JmxRemoteConnector(host:host, port:port).getUnauthorizedMBeanServerConnection())
 	}
-	
+
 	JmxClient(List<JmxMBeanData> retrievableMetrics, Long intervall) throws IOException {
 		this(retrievableMetrics, intervall, ManagementFactory.platformMBeanServer)
 	}
@@ -143,17 +154,23 @@ class JmxClient extends Thread {
 		this.intervall = intervall
 		this.retrievableMetrics = retrievableMetrics
 		this.mbeanConnection = mbeanConnection
+		this.setDaemon(true)
 	}
 
 	@Override
 	void run(){
 		while(!isInterupted){
-			sleep(intervall)
-			def currentResult = []
-			retrievableMetrics.each { currentJmxData ->
-				currentResult << evaluateJmxMBeanData(currentJmxData)
+			try {
+				sleep(intervall)
+				def currentResult = []
+				retrievableMetrics.each { currentJmxData ->
+					currentResult << evaluateJmxMBeanData(currentJmxData)
+				}
+				resultQueue.add(currentResult.flatten())
+			} catch (Exception e) {
+				e.printStackTrace();
+				interrupt()
 			}
-			resultQueue.add(currentResult.flatten())
 		}
 	}
 

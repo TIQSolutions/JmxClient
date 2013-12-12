@@ -68,8 +68,7 @@ class CsvPrinter extends Thread {
 	@Override
 	public void run() {
 		while(!isInterrupted){
-			def currentResult = writableResults.take().collect{it.getValue()} // TODO maybe pass this closure as a 
-																			   //parameter to support different classes than attribute  
+			def currentResult = writableResults.take()
 			outputFile.append(currentResult.join(SEPARATOR)) 
 			outputFile.append("\n")
 		}

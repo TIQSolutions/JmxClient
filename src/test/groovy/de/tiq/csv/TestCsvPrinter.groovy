@@ -23,11 +23,10 @@
 package de.tiq.csv
 
 import java.util.concurrent.LinkedBlockingQueue
-import javax.management.Attribute;
 
 class TestCsvPrinter extends GroovyTestCase {
 
-	private static String TEST_FILE_DEST = "./target/test-classes/csv-data-testfile"
+	private static String TEST_FILE_DEST = "./csv-data-testfile"
 	
 	private File resultFile
 	
@@ -40,8 +39,8 @@ class TestCsvPrinter extends GroovyTestCase {
 		def headerFixture = ["headerA","headerB"]
 		def testable = new CsvPrinter(TEST_FILE_DEST, headerFixture, resultListHandle)
 		assertEquals(headerFixture.join(","), resultFile.getText().split(/\n/)[1])
-		resultListHandle.put([["", "a"] as Attribute, ["", "b"] as Attribute])
-		resultListHandle.put([["", "c"] as Attribute, ["", "d"] as Attribute])
+		resultListHandle.put(["a", "b"])
+		resultListHandle.put(["c", "d"])
 		Thread.sleep(100L)
 		def finalResult = resultFile.getText().split(/\n/)
 		assertEquals(4, finalResult.size())

@@ -3,9 +3,15 @@
 	<JmxMBeanData>
 		<associatedObjectName>hadoop:service=RegionServer,name=RegionServerStatistics</associatedObjectName>
 		<attributes>
-			<attribut>requests</attribut>
-			<attribut>readRequestsCount</attribut><!-- Aggregated read request count -->
-			<attribut>writeRequestsCount</attribut><!-- Aggregated write request count -->
+			<attribut>
+				<name>requests</name>
+			</attribut>
+			<attribut><!-- Aggregated read request count -->
+				<name>readRequestsCount</name>
+			</attribut>
+			<attribut><!-- Aggregated write request count -->
+				<name>writeRequestsCount</name>
+			</attribut>
 		</attributes>
 	</JmxMBeanData>
 </jmxData> 

@@ -34,7 +34,7 @@ import org.junit.runners.Parameterized.Parameters
 @RunWith(Parameterized)
 class TestXmlToJmxBeanDataConverter {
 
-	private static String FILE_PATH_PREFIX = "src/test/resources/"
+	private static String FILE_PATH_PREFIX = "./"
 	
 	@Parameters(name="parsing xml file {0} to JmxMBeanData")
 	public static List<Object[]> data() {

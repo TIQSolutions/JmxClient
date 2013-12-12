@@ -32,7 +32,7 @@ As you can see, the JmxClient needs at least three parameters.
 - the port on which the jmx server emits data
 - a jmx_file, which is basicly just a xml file, containing the information about which values are extracted
 
-A jmx file could be named freely. 
+A jmx file could be named without any restrictions. 
 It's content should look like this:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -40,13 +40,16 @@ It's content should look like this:
 	<JmxMBeanData>
 		<associatedObjectName>java.lang:type=Threading</associatedObjectName>
 		<attributes>
-			<attribut>ThreadCount</attribut>
+			<attribut>
+				<name>ThreadCount</name>
+			</attribut>
 		</attributes>
 	</JmxMBeanData>
 </jmxData>
 ```
 A you can see, you can specify many ore one attribute(s) for each available associatedObjectName. 
-Which attributes are available differs of course from associatedObject to associatedObject.
+Which attributes are available differs of course from every associatedObject.
+If an attribute is an instance of 
 In the case of the example ThreadMXBean, see http://docs.oracle.com/javase/6/docs/api/java/lang/management/ThreadMXBean.html for details.
 
 ```java

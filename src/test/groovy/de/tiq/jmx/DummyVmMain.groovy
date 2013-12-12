@@ -26,6 +26,20 @@ class DummyVmMain {
 
 	static main(args){
 		println "started dummy"
-		Thread.sleep(5000)
+		def sleepDuration = 5000
+		if(args.size() == 1)
+			sleepDuration = Integer.parseInt(args[0])
+		Thread.sleep(sleepDuration)
+	}
+	
+	static startDummyJmxEnabledVM(String classPath, String testPort){
+		def jmxremote = 'com.sun.management.jmxremote'
+		"""java -D${jmxremote}\
+			   -D${jmxremote}.authenticate=false\
+			   -D${jmxremote}.ssl=false\
+			   -D${jmxremote}.port=${testPort}\
+			   -cp ${classPath} de.tiq.jmx.DummyVmMain"""
+	   .execute()
+		Thread.sleep(1000L)
 	}
 }

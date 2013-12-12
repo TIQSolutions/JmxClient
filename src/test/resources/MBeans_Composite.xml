@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmxData>
+	<JmxMBeanData>
+		<associatedObjectName>java.lang:type=Memory</associatedObjectName>
+		<attributes>
+			<attribut>
+				<name>HeapMemoryUsage</name>
+				<compositeKeys>
+					<key>init</key>
+					<key>max</key>
+					<key>used</key>
+				</compositeKeys>
+			</attribut>
+		</attributes>
+	</JmxMBeanData>
+</jmxData>

@@ -47,21 +47,14 @@ class TestJmxClient {
 																])
 	
 	private static final Long INTERVALL = 90L
-	
 	private static final String TESTPORT = "8909"
+	
 	
 	@Parameters(name="calling constructor with params: QueryList, Intervall, {0}")
 	public static List<Object[]> data() {
 		def dummyJvmCreator = {
 			def classPath = System.getProperty('java.class.path')
-			def jmxremote = 'com.sun.management.jmxremote'
-			"""java -D${jmxremote}\
-			   -D${jmxremote}.authenticate=false\
-			   -D${jmxremote}.ssl=false\
-			   -D${jmxremote}.port=${TESTPORT}\
-			   -cp ${classPath} de.tiq.jmx.DummyVmMain"""
-           .execute()
-			Thread.sleep(1000L)
+			DummyVmMain.startDummyJmxEnabledVM(classPath, TESTPORT)
 		}
 		return [ [ [], {}, QUERY_NEU ] as Object[],
 				  [[ManagementFactory.platformMBeanServer], {}, QUERY] as Object[],
