@@ -79,7 +79,7 @@ class TestJmxClient {
 		testable.start()
 		Thread.sleep(1000)
 		testable.interrupt()
-		assert (8..10).containsWithinBounds(testable.resultQueue.size()) 	
+		assert (8..12).containsWithinBounds(testable.resultQueue.size()) 	
 	}
 	
 }
